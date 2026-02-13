@@ -2,8 +2,8 @@
 const CACHE_VERSION = 'slcc-ky-v1.0.0';
 // 核心缓存资源（内置SVG图标，无需额外文件）
 const CACHE_ASSETS = [
-  '/slcc-full-app.html',
-  '/manifest.json',
+  './slcc-full-app.html',
+  './manifest.json',
   '/'
 ];
 
