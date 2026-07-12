@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 - SLCC康养管理系统</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans SC', sans-serif; background:linear-gradient(135deg,#1a5f7a 0%,#0d3d4f 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-box { background:#fff; border-radius:16px; padding:36px 28px; width:100%; max-width:360px; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
+  .login-box h2 { color:#1a5f7a; margin-bottom:6px; font-size:22px; }
+  .login-box p { color:#6c757d; font-size:13px; margin-bottom:24px; }
+  input { width:100%; padding:12px 14px; margin-bottom:14px; border:1px solid #e9ecef; border-radius:10px; font-size:15px; }
+  input:focus { outline:none; border-color:#1a5f7a; }
+  button { width:100%; padding:13px; background:#1a5f7a; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:500; cursor:pointer; }
+  button:disabled { opacity:0.6; }
+  #errorMsg { color:#e63946; font-size:13px; margin-top:10px; min-height:18px; }
+</style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>SLCC 总管理后台</h2>
+    <p>请登录以访问系统</p>
+    <input id="email" type="email" placeholder="邮箱" autocomplete="username">
+    <input id="password" type="password" placeholder="密码" autocomplete="current-password">
+    <button id="loginBtn" onclick="login()">登 录</button>
+    <div id="errorMsg"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://txvyplfaaisrzbwpoqcd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ZgDcY0b1NGjf1iEArms2Dw_GMDlIOU5';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // If already logged in, skip straight to the app
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = 'index.html';
+    });
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = '';
+      if (!email || !password) { errorMsg.textContent = '请输入邮箱和密码'; return; }
+
+      btn.disabled = true;
+      btn.textContent = '登录中...';
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      btn.disabled = false;
+      btn.textContent = '登 录';
+
+      if (error) {
+        errorMsg.textContent = '登录失败：邮箱或密码错误';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    document.getElementById('password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>
