@@ -1,5 +1,5 @@
-﻿// SLCC康养PWA服务工作者 - 离线缓存/后台运行
-const CACHE_VERSION = 'slcc-ky-v1.1.0';
+// SLCC康养PWA服务工作者 - 离线缓存/后台运行
+const CACHE_VERSION = 'slcc-ky-v1.1.1';
 // 核心缓存资源（内置SVG图标，无需额外文件）
 const CACHE_ASSETS = [
   './slcc-full-app.html',
@@ -34,3 +34,26 @@ self.addEventListener('fetch', (event) => {
   if (!event.request.url.startsWith(self.location.origin) || event.request.method !== 'GET') {
     return;
   }
+
+  event.respondWith(
+    caches.match(event.request).then(cachedResponse => {
+      // 命中缓存：直接返回，同时后台更新缓存（stale-while-revalidate）
+      const networkFetch = fetch(event.request)
+        .then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_VERSION).then(cache => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // 网络失败且无缓存时，返回离线兜底页（如果有缓存首页则退回首页）
+          return cachedResponse || caches.match('./slcc-full-app.html');
+        });
+
+      return cachedResponse || networkFetch;
+    })
+  );
+});
