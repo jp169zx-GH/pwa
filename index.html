@@ -1,0 +1,895 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SLCC康养全平台">
+    <meta name="theme-color" content="#1a5f7a">
+    <title>SLCC康养会员管理系统</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231a5f7a'/><path d='M96 40c-30.9 0-56 25.1-56 56s25.1 56 56 56 56-25.1 56-56-25.1-56-56-56zm0 92c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36z' fill='white'/><circle cx='96' cy='96' r='16' fill='white'/></svg>">
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --primary-light: #2d7a94;
+            --primary-dark: #0d3d4f;
+            --accent: #f4a261;
+            --accent-light: #f6b883;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --success: #52b788;
+            --warning: #f4a261;
+            --danger: #e63946;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: var(--text-primary); overflow-x: hidden; padding-bottom: 90px; }
+        .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 60px 20px 30px; position: relative; overflow: hidden; }
+        .greeting { font-size: 28px; font-weight: 300; margin-bottom: 8px; position: relative; z-index: 1; }
+        .member-info { display: flex; align-items: center; margin-top: 20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 16px; border-radius: var(--border-radius); position: relative; z-index: 1; }
+        .member-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-right: 16px; border: 3px solid rgba(255,255,255,0.3); }
+        .member-details h2 { font-size: 20px; margin-bottom: 4px; font-weight: 500; }
+        .member-level { font-size: 14px; opacity: 0.9; display: flex; align-items: center; gap: 8px; }
+        .level-badge { background: var(--accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .module-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; margin-top: -30px; position: relative; z-index: 2; }
+        .module-btn { background: white; border-radius: var(--border-radius); padding: 16px 8px; text-align: center; box-shadow: var(--shadow-sm); transition: var(--transition); cursor: pointer; border: none; }
+        .module-btn:active { transform: scale(0.95); box-shadow: var(--shadow-md); }
+        .module-icon { font-size: 24px; margin-bottom: 6px; }
+        .module-label { font-size: 12px; color: var(--text-primary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .main-content { padding: 0 20px 20px; }
+        .section { background: white; border-radius: var(--border-radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .section-title { font-size: 18px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .section-more { color: var(--primary); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .stat-card { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); padding: 16px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: var(--text-secondary); }
+        .list-card { display: flex; align-items: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: var(--transition); }
+        .list-card:active { background: var(--bg-tertiary); }
+        .list-icon { font-size: 24px; margin-right: 16px; color: var(--primary); width: 30px; text-align: center; }
+        .list-content { flex: 1; }
+        .list-title { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+        .list-desc { font-size: 12px; color: var(--text-secondary); }
+        .page-view { display: none; animation: pageSlideIn 0.3s ease-out; }
+        .page-view.active { display: block; }
+        @keyframes pageSlideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .page-header { background: white; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 99; }
+        .page-title { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-primary); }
+        .form-input, .form-select { width: 100%; padding: 12px 16px; border: 2px solid var(--bg-tertiary); border-radius: 12px; font-size: 15px; font-family: inherit; transition: var(--transition); }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
+        .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 10px; }
+        .btn-primary:active { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .btn-secondary { width: 100%; padding: 14px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 10px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0 env(safe-area-inset-bottom); box-shadow: 0 -2px 16px rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; cursor: pointer; transition: var(--transition); border: none; background: none; color: var(--text-secondary); }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 11px; font-weight: 500; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(33, 37, 41, 0.95); color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; z-index: 2000; transition: var(--transition); opacity: 0; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .install-prompt { position: fixed; bottom: 90px; left: 20px; right: 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 16px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); display: none; align-items: center; gap: 12px; z-index: 999; }
+        .install-prompt.show { display: flex; }
+        .install-btn { padding: 8px 16px; background: white; color: var(--primary); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .close-install { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 4px; }
+        .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+        .badge-success { background: rgba(82, 183, 136, 0.2); color: var(--success); }
+        .badge-warning { background: rgba(244, 162, 97, 0.2); color: var(--warning); }
+        .badge-danger { background: rgba(230, 57, 70, 0.2); color: var(--danger); }
+        .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table td { padding: 10px; font-size: 13px; border-bottom: 1px solid var(--bg-tertiary); }
+        .table tr:last-child td { border-bottom: none; }
+        .table td:first-child { color: var(--text-secondary); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="authGate" style="position:fixed;inset:0;background:#f8f9fa;z-index:9999;display:flex;align-items:center;justify-content:center;color:#6c757d;font-family:sans-serif;">验证登录状态...</div>
+    <!-- 安装提示 -->
+    <div id="installPrompt" class="install-prompt">
+        <div>📱</div>
+        <div class="install-content">
+            <div style="font-size:15px;font-weight:600;margin-bottom:4px;">安装SLCC康养管理系统</div>
+            <div style="font-size:13px;opacity:0.9;">添加到主屏幕,随时访问全模块功能</div>
+        </div>
+        <button class="install-btn" id="installBtn">安装</button>
+        <button class="close-install" id="closeInstall">×</button>
+    </div>
+    <!-- 提示框 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 主页面（模块入口） -->
+    <div id="mainPage" class="page-view active">
+        <div class="header">
+            <div class="greeting" id="greeting">早上好</div>
+            <div class="member-info">
+                <div class="member-avatar">👤</div>
+                <div class="member-details">
+                    <h2>SLCC总管理后台</h2>
+                    <div class="member-level">
+                        <span class="level-badge">✨ 超级管理员</span>
+                        <span>登录时间: 2026-02-12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 7大模块入口 -->
+        <div class="module-nav">
+            <button class="module-btn" onclick="showPage('memberAppPage')">
+                <div class="module-icon">👴🏻</div>
+                <div class="module-label">康养会员APP</div>
+            </button>
+            <button class="module-btn" onclick="showPage('healthManagePage')">
+                <div class="module-icon">💓</div>
+                <div class="module-label">健康管理系统</div>
+            </button>
+            <button class="module-btn" onclick="showPage('salesAppPage')">
+                <div class="module-icon">📈</div>
+                <div class="module-label">销售APP</div>
+            </button>
+            <button class="module-btn" onclick="showPage('depositPage')">
+                <div class="module-icon">🏦</div>
+                <div class="module-label">保证金管理</div>
+            </button>
+            <button class="module-btn" onclick="showPage('accommodationPage')">
+                <div class="module-icon">🏨</div>
+                <div class="module-label">住宿服务管理</div>
+            </button>
+            <button class="module-btn" onclick="showPage('financePage')">
+                <div class="module-icon">💰</div>
+                <div class="module-label">财务管理系统</div>
+            </button>
+            <button class="module-btn" onclick="showPage('cardPage')">
+                <div class="module-icon">💳</div>
+                <div class="module-label">储值卡管理</div>
+            </button>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 系统总览</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotalMembers">256</div>
+                        <div class="stat-label">总会员数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥896万</div>
+                        <div class="stat-label">总保证金</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statMonthRevenueMain">¥128万</div>
+                        <div class="stat-label">本月营收</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块1：康养会员APP -->
+    <div id="memberAppPage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">👴🏻 康养会员APP</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开会员首页')">
+                    <div class="list-icon">🏠</div>
+                    <div class="list-content">
+                        <div class="list-title">首页</div>
+                        <div class="list-desc">个性化问候、会员信息、快捷服务入口</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开账户管理')">
+                    <div class="list-icon">💳</div>
+                    <div class="list-content">
+                        <div class="list-title">会员账户管理</div>
+                        <div class="list-desc">账户详情、权益状态、费用查询</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开服务预约')">
+                    <div class="list-icon">🏥</div>
+                    <div class="list-content">
+                        <div class="list-title">服务咨询/预约</div>
+                        <div class="list-desc">医疗、护理、康复理疗预约</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开活动报名')">
+                    <div class="list-icon">🎭</div>
+                    <div class="list-content">
+                        <div class="list-title">活动报名</div>
+                        <div class="list-desc">旅游、文娱、体育、社交活动</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开健康档案')">
+                    <div class="list-icon">📋</div>
+                    <div class="list-content">
+                        <div class="list-title">健康档案+穿戴设备</div>
+                        <div class="list-desc">病历、诊疗记录、智能手环/戒指管理</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 会员数据</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTodayBookings">68</div>
+                        <div class="stat-label">今日服务预约</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">32</div>
+                        <div class="stat-label">今日活动报名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">96%</div>
+                        <div class="stat-label">穿戴设备绑定率</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块2：健康管理系统 -->
+    <div id="healthManagePage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">💓 健康管理系统</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开会员档案管理')">
+                    <div class="list-icon">📝</div>
+                    <div class="list-content">
+                        <div class="list-title">会员档案管理</div>
+                        <div class="list-desc">客户画像、健康数据记录、偏好记录</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开健康保险管理')">
+                    <div class="list-icon">📜</div>
+                    <div class="list-content">
+                        <div class="list-title">健康保险管理</div>
+                        <div class="list-desc">投保、缴费、看病报销、理赔数据查询</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开健康服务管理')">
+                    <div class="list-icon">🏥</div>
+                    <div class="list-content">
+                        <div class="list-title">健康服务管理</div>
+                        <div class="list-desc">定制化套餐、服务预约、记录与评价</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 健康服务统计</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statServicePackages">128</div>
+                        <div class="stat-label">定制服务套餐数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statMonthServiceCount">896</div>
+                        <div class="stat-label">本月服务次数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">4.8</div>
+                        <div class="stat-label">服务平均评分</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📜 最新理赔记录</h3>
+                </div>
+                <table class="table">
+                    <tbody id="claimsTableBody">
+                    <tr><td>会员姓名</td><td>张建国</td><td>理赔金额</td><td>¥2,800</td><td><span class="badge badge-success">已完成</span></td></tr>
+                    <tr><td>会员姓名</td><td>李淑芬</td><td>理赔金额</td><td>¥5,600</td><td><span class="badge badge-warning">处理中</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块3：销售APP -->
+    <div id="salesAppPage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">📈 销售APP</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开产品展示')">
+                    <div class="list-icon">📦</div>
+                    <div class="list-content">
+                        <div class="list-title">会员产品展示</div>
+                        <div class="list-desc">套餐详情、权益说明、价格展示</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开在线咨询')">
+                    <div class="list-icon">💬</div>
+                    <div class="list-content">
+                        <div class="list-title">在线咨询/预约</div>
+                        <div class="list-desc">销售对接、实地考察预约</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开报名申请')">
+                    <div class="list-icon">📝</div>
+                    <div class="list-content">
+                        <div class="list-title">报名申请</div>
+                        <div class="list-desc">资料提交、资格审核、缴费入口</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开数据统计')">
+                    <div class="list-icon">📊</div>
+                    <div class="list-content">
+                        <div class="list-title">销售数据+推荐奖励</div>
+                        <div class="list-desc">线索跟踪、转化率分析、推荐奖金统计</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 销售数据统计</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">56</div>
+                        <div class="stat-label">本月新增线索</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">28%</div>
+                        <div class="stat-label">线索转化率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">32</div>
+                        <div class="stat-label">本月新增会员</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📦 热门产品</h3>
+                </div>
+                <div class="list-card">
+                    <div class="list-icon">💎</div>
+                    <div class="list-content">
+                        <div class="list-title">钻石康养套餐</div>
+                        <div class="list-desc">¥19800/年 | 已售86份</div>
+                    </div>
+                </div>
+                <div class="list-card">
+                    <div class="list-icon">🥇</div>
+                    <div class="list-content">
+                        <div class="list-title">黄金康养套餐</div>
+                        <div class="list-desc">¥9800/年 | 已售128份</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块4：保证金管理 -->
+    <div id="depositPage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">🏦 保证金管理系统</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开账户管理')">
+                    <div class="list-icon">💳</div>
+                    <div class="list-content">
+                        <div class="list-title">保证金账户管理</div>
+                        <div class="list-desc">分账核算、资金隔离、账户详情</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开保证金操作')">
+                    <div class="list-icon">💰</div>
+                    <div class="list-content">
+                        <div class="list-title">保证金操作</div>
+                        <div class="list-desc">缴纳、冻结、退还、明细查询</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开投资项目管理')">
+                    <div class="list-icon">📈</div>
+                    <div class="list-content">
+                        <div class="list-title">投资项目管理</div>
+                        <div class="list-desc">信托/合规标的录入、收益跟踪</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开资金监控')">
+                    <div class="list-icon">👀</div>
+                    <div class="list-content">
+                        <div class="list-title">资金流向监控</div>
+                        <div class="list-desc">转入/转出记录、风控预警</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 保证金数据</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">¥896万</div>
+                        <div class="stat-label">总保证金余额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥28.6万</div>
+                        <div class="stat-label">本月投资收益</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">3.2%</div>
+                        <div class="stat-label">年化收益率</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">🚨 风控预警</h3>
+                </div>
+                <div class="list-card" style="border-left:4px solid var(--warning);">
+                    <div class="list-icon">⚠️</div>
+                    <div class="list-content">
+                        <div class="list-title">账户资金异动</div>
+                        <div class="list-desc">会员王XX账户单日转出超5万，需审核</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块5：住宿服务管理 -->
+    <div id="accommodationPage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">🏨 住宿服务管理系统</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开住宿管理')">
+                    <div class="list-icon">🛏️</div>
+                    <div class="list-content">
+                        <div class="list-title">住宿管理</div>
+                        <div class="list-desc">房型预订、入住登记、退房结算</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开餐饮管理')">
+                    <div class="list-icon">🍽️</div>
+                    <div class="list-content">
+                        <div class="list-title">餐饮消费管理</div>
+                        <div class="list-desc">订餐记账、消费统计、账单查询</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开服务监督')">
+                    <div class="list-icon">⭐</div>
+                    <div class="list-content">
+                        <div class="list-title">服务质量监督</div>
+                        <div class="list-desc">投诉处理、满意度调研、服务评分</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开Booking对账')">
+                    <div class="list-icon">📊</div>
+                    <div class="list-content">
+                        <div class="list-title">Booking系统对接</div>
+                        <div class="list-desc">房间预定、8%-12%收费对账管理</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 住宿餐饮数据</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">78%</div>
+                        <div class="stat-label">今日房间入住率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥16.8万</div>
+                        <div class="stat-label">本月住宿收入</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥8.6万</div>
+                        <div class="stat-label">本月餐饮收入</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📅 近期预订</h3>
+                </div>
+                <table class="table">
+                    <tr><td>房型</td><td>豪华单人间</td><td>入住时间</td><td>2026-02-15</td><td><span class="badge badge-success">已确认</span></td></tr>
+                    <tr><td>房型</td><td>康养双人间</td><td>入住时间</td><td>2026-02-16</td><td><span class="badge badge-success">已确认</span></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块6：财务管理系统 -->
+    <div id="financePage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">💰 康养服务财务管理系统</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开收支核算')">
+                    <div class="list-icon">📊</div>
+                    <div class="list-content">
+                        <div class="list-title">收支核算</div>
+                        <div class="list-desc">会员费、服务费、保证金、投资收益核算</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开成本归集')">
+                    <div class="list-icon">📝</div>
+                    <div class="list-content">
+                        <div class="list-title">成本归集</div>
+                        <div class="list-desc">社区/酒店运营成本、服务成本分摊</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开财务报表')">
+                    <div class="list-icon">📈</div>
+                    <div class="list-content">
+                        <div class="list-title">财务报表</div>
+                        <div class="list-desc">利润表、资金明细表、税务申报辅助</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开对账功能')">
+                    <div class="list-icon">🔗</div>
+                    <div class="list-content">
+                        <div class="list-title">多系统对账</div>
+                        <div class="list-desc">酒店/住宿系统、银行保证金账户对接</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 财务核心数据</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statMonthRevenueFinance">¥128万</div>
+                        <div class="stat-label">本月总营收</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥46.8万</div>
+                        <div class="stat-label">本月总支出</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥81.2万</div>
+                        <div class="stat-label">本月净利润</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📜 本月收支明细</h3>
+                </div>
+                <table class="table">
+                    <tr><td>会员费收入</td><td>¥68.5万</td><td>运营成本</td><td>¥28.6万</td></tr>
+                    <tr><td>服务收入</td><td>¥42.3万</td><td>服务成本</td><td>¥18.2万</td></tr>
+                    <tr><td>投资收益</td><td>¥17.2万</td><td>其他支出</td><td>¥0</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块7：储值卡管理 -->
+    <div id="cardPage" class="page-view">
+        <div class="page-header">
+            <h1 class="page-title">💳 会员储值卡管理模块</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">核心功能</h3>
+                </div>
+                <div class="list-card" onclick="showToast('打开餐饮消费管理')">
+                    <div class="list-icon">🍽️</div>
+                    <div class="list-content">
+                        <div class="list-title">餐饮消费管理</div>
+                        <div class="list-desc">订餐记账、消费统计、储值卡支付</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开旅游消费管理')">
+                    <div class="list-icon">✈️</div>
+                    <div class="list-content">
+                        <div class="list-title">旅游消费管理</div>
+                        <div class="list-desc">酒店预订、入住登记、退房结算</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开文娱消费管理')">
+                    <div class="list-icon">🎭</div>
+                    <div class="list-content">
+                        <div class="list-title">文娱活动消费管理</div>
+                        <div class="list-desc">消费记账、结算、消费统计</div>
+                    </div>
+                </div>
+                <div class="list-card" onclick="showToast('打开积分管理')">
+                    <div class="list-icon">⭐</div>
+                    <div class="list-content">
+                        <div class="list-title">储值卡积分管理</div>
+                        <div class="list-desc">充值送积分、积分消费、积分结算</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">📊 储值卡数据</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">236</div>
+                        <div class="stat-label">已开储值卡数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥586万</div>
+                        <div class="stat-label">储值卡总余额</div>
+                    </div>
+                </div>
+                <div class="stats-grid" style="margin-top:12px;">
+                    <div class="stat-card">
+                        <div class="stat-value">¥128万</div>
+                        <div class="stat-label">本月储值消费</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">56.8万</div>
+                        <div class="stat-label">本月充值金额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">89.6万</div>
+                        <div class="stat-label">累计积分</div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">🔧 储值卡操作</h3>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">会员姓名</label>
+                    <input type="text" class="form-input" placeholder="请输入会员姓名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">操作类型</label>
+                    <select class="form-select">
+                        <option>储值卡充值</option>
+                        <option>积分兑换</option>
+                        <option>消费记录查询</option>
+                        <option>储值卡挂失</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="showToast('操作成功！')">提交操作</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="mainNav" onclick="showPage('mainPage')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">首页</div>
+        </button>
+        <button class="nav-item" onclick="showToast('数据统计功能开发中...')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">数据</div>
+        </button>
+        <button class="nav-item" onclick="showToast('系统设置功能开发中...')">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">设置</div>
+        </button>
+    </nav>
+
+    <script>
+        // PWA安装提示
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+        const closeInstall = document.getElementById('closeInstall');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            setTimeout(() => {
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    installPrompt.classList.add('show');
+                }
+            }, 3000);
+        });
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+            installPrompt.classList.remove('show');
+        });
+        closeInstall.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+        });
+        // Service Worker注册
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW注册失败'));
+            });
+        }
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page-view').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('mainNav').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // 提示框
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        // 动态问候语
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greeting = document.getElementById('greeting');
+            greeting.textContent = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+        }
+        // 初始化
+        updateGreeting();
+        // 网络状态检测
+        window.addEventListener('online', () => showToast('网络已连接'));
+        window.addEventListener('offline', () => showToast('网络断开，部分功能受限'));
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+    // Shared Supabase client — same project as slcc-nextjs, so both apps
+    // read/write the same slcc_ tables (RLS restricts access to logged-in users).
+    const SUPABASE_URL = 'https://txvyplfaaisrzbwpoqcd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ZgDcY0b1NGjf1iEArms2Dw_GMDlIOU5';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    sb.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('authGate').remove();
+            const btn = document.createElement('button');
+            btn.textContent = '退出登录';
+            btn.style.cssText = 'position:fixed;top:12px;right:12px;z-index:1000;background:rgba(0,0,0,0.45);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:13px;';
+            btn.onclick = async () => { await sb.auth.signOut(); };
+            document.body.appendChild(btn);
+            loadLiveData();
+        }
+    });
+
+    sb.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = 'login.html';
+    });
+
+    // ------------------------------------------------------------------
+    // Live data — replaces the hardcoded mockup numbers with real reads
+    // from the same slcc_ tables the Next.js dashboard uses.
+    // Any query here can fail silently (leaves the mockup number in place)
+    // so a missing table/column never breaks the page.
+    // ------------------------------------------------------------------
+    function money(n) {
+        if (n === null || n === undefined) return '—';
+        return n >= 10000 ? `¥${(n / 10000).toFixed(1)}万` : `¥${Number(n).toLocaleString()}`;
+    }
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el && value !== null && value !== undefined) el.textContent = value;
+    }
+    function monthStart() {
+        const d = new Date();
+        return new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
+    }
+    function dayStart() {
+        const d = new Date();
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+    }
+
+    async function loadLiveData() {
+        // 总会员数 (main overview)
+        try {
+            const { count } = await sb.from('slcc_members').select('*', { count: 'exact', head: true });
+            setText('statTotalMembers', count ?? '—');
+        } catch (e) { console.warn('slcc_members count failed', e); }
+
+        // 本月营收 — sum of paid billing this month (main overview + finance page)
+        try {
+            const { data, error } = await sb
+                .from('slcc_billing')
+                .select('amount')
+                .eq('status', 'paid')
+                .gte('paid_at', monthStart());
+            if (!error && data) {
+                const total = data.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+                setText('statMonthRevenueMain', money(total));
+                setText('statMonthRevenueFinance', money(total));
+            }
+        } catch (e) { console.warn('slcc_billing sum failed', e); }
+
+        // 今日服务预约 — care bookings scheduled today (member module)
+        try {
+            const { count } = await sb
+                .from('slcc_care_bookings')
+                .select('*', { count: 'exact', head: true })
+                .gte('scheduled_at', dayStart());
+            setText('statTodayBookings', count ?? '—');
+        } catch (e) { console.warn('slcc_care_bookings today count failed', e); }
+
+        // 定制服务套餐数 — active care services (health module)
+        try {
+            const { count } = await sb
+                .from('slcc_care_services')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_active', true);
+            setText('statServicePackages', count ?? '—');
+        } catch (e) { console.warn('slcc_care_services count failed', e); }
+
+        // 本月服务次数 — care bookings this month (health module)
+        try {
+            const { count } = await sb
+                .from('slcc_care_bookings')
+                .select('*', { count: 'exact', head: true })
+                .gte('scheduled_at', monthStart());
+            setText('statMonthServiceCount', count ?? '—');
+        } catch (e) { console.warn('slcc_care_bookings month count failed', e); }
+
+        // 最新理赔记录 — 5 most recent insurance claims (health module)
+        try {
+            const { data, error } = await sb
+                .from('slcc_insurance_claims')
+                .select('member_id, amount, status, submitted_at')
+                .order('submitted_at', { ascending: false })
+                .limit(5);
+            if (!error && data) {
+                const tbody = document.getElementById('claimsTableBody');
+                const statusLabel = { approved: '已完成', pending: '处理中', rejected: '已拒绝' };
+                const statusClass = { approved: 'badge-success', pending: 'badge-warning', rejected: 'badge-danger' };
+                if (data.length) {
+                    tbody.innerHTML = data.map(r => `
+                        <tr>
+                            <td>会员ID</td><td>${String(r.member_id || '').slice(0, 8)}…</td>
+                            <td>理赔金额</td><td>${money(r.amount)}</td>
+                            <td><span class="badge ${statusClass[r.status] || 'badge-warning'}">${statusLabel[r.status] || r.status || '—'}</span></td>
+                        </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);">暂无理赔记录</td></tr>';
+                }
+            }
+        } catch (e) { console.warn('slcc_insurance_claims fetch failed', e); }
+    }
+    </script>
+</body>
+</html>
